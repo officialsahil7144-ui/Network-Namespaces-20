@@ -1,30 +1,16 @@
-#!/usr/bin/env bash
-set -u
-
-echo "Network Namespace Inspection"
-echo "----------------------------"
-
-echo
-echo "Current network namespace:"
-readlink /proc/self/ns/net
-
-echo
-echo "Current process namespaces:"
-lsns -t net 2>/dev/null || echo "Namespace listing is unavailable."
-
-echo
-echo "Container environment:"
-if [[ -f /.dockerenv ]]; then
-    echo "Running inside a Docker container."
-elif grep -qi microsoft /proc/version 2>/dev/null; then
-    echo "Running inside WSL."
-else
-    echo "No Docker or WSL marker detected."
-fi
-
-echo
-echo "Network interfaces:"
-ip -brief link || true
-
-echo
-echo "Namespace inspection completed."
+#!/usr/bin/env bash 
+echo "Current network namespace:" 
+readlink /proc/$$/ns/net 
+echo 
+echo "Container indicators:" 
+if [[ -f /.dockerenv ]]; then 
+  echo "Docker container marker found" 
+else 
+  echo "No /.dockerenv marker found (this does not prove the host is not containerized)" 
+fi 
+echo 
+echo "Namespace-aware process listing:" 
+ps -eo pid,comm | head -n 8 
+echo 
+echo "Optional Docker check:" 
+if command -v docker >/dev/null 2>&1; then docker --version; else echo "Docker CLI not installed"; fi 
